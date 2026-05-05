@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>건축물 등록</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>🔐 건축물 등록</h1>
+
+  <input id="owner" placeholder="소유자"><br><br>
+  <input id="x" type="number" placeholder="X 좌표"><br><br>
+  <input id="y" type="number" placeholder="Y 좌표" value="0"><br><br>
+  <input id="z" type="number" placeholder="Z 좌표"><br><br>
+  <input id="img" placeholder="이미지 링크"><br><br>
+
+  <button onclick="addBuilding()">등록</button>
+
+  <div id="result"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://dinfvxpscdargizxkyqg.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_gPbDX3pQoGWxNVqc9Z7Vgw_tTF9tAGZ";
+
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function generateUniqueCode() {
+      while (true) {
+        const code = Math.floor(10000 + Math.random() * 90000);
+
+        const { data } = await db
+          .from("buildings")
+          .select("code")
+          .eq("code", code);
+
+        if (!data || data.length === 0) {
+          return code;
+        }
+      }
+    }
+
+    async function addBuilding() {
+      const owner = document.getElementById("owner").value.trim();
+      const x = Number(document.getElementById("x").value);
+      const y = Number(document.getElementById("y").value);
+      const z = Number(document.getElementById("z").value);
+      const img = document.getElementById("img").value.trim();
+      const result = document.getElementById("result");
+
+      if (!owner || Number.isNaN(x) || Number.isNaN(y) || Number.isNaN(z) || !img) {
+        result.innerHTML = "❌ 빈칸 없이 입력해줘.";
+        return;
+      }
+
+      const { data: sameCoord } = await db
+        .from("buildings")
+        .select("*")
+        .eq("x", x)
+        .eq("y", y)
+        .eq("z", z);
+
+      if (sameCoord && sameCoord.length > 0) {
+        result.innerHTML = "❌ 이미 등록된 좌표야.";
+        return;
+      }
+
+      const code = await generateUniqueCode();
+
+      const { error } = await db.from("buildings").insert([
+        { code, owner, x, y, z, img }
+      ]);
+
+      if (error) {
+        result.innerHTML = "❌ 등록 실패";
+        console.error(error);
+        return;
+      }
+
+      result.innerHTML = `
+        ✅ 등록 완료!<br>
+        👤 소유자: ${owner}<br>
+        📍 좌표: ${x}, ${y}, ${z}<br>
+        🔑 등록 코드: ${code}<br>
+        <a href="${img}" target="_blank">📷 이미지 보기</a>
+      `;
+    }
+  </script>
+</body>
+</html>

@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -7,15 +6,14 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <h1>🏗️ 건축물 조회 시스템</h1>
 
-<h1>🏗️ 건축물 조회 시스템</h1>
+  <input type="text" id="search" placeholder="코드, 좌표, 소유자 입력">
+  <button onclick="searchBuilding()">검색</button>
 
-<input type="text" id="search" placeholder="코드 또는 좌표 입력">
-<button onclick="searchBuilding()">검색</button>
+  <div id="result"></div>
 
-<div id="result"></div>
-
-<script src="script.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="script.js"></script>
 </body>
 </html>
